@@ -1,0 +1,118 @@
+---
+title: "Live Session Assignment 9"
+author: "Kevin Cannon"
+date: "November 13, 2016"
+output: 
+  html_document:
+       keep_md: yes
+---
+
+# Dataset
+```{r}
+# read in file
+file <- "https://raw.githubusercontent.com/merdirafiei/CHF/master/CHF.csv"
+chf <- read.csv(file)
+# explore data
+head(chf)
+str(chf)
+#attach dataframe
+attach(chf)
+```
+
+### 1. Show the mean for Amount Paid by Medicare, Total Accommodation Charges, and Total Departmental Charges
+```{r}
+mean(AmtReim)
+mean(TotAccomChg)
+mean(TotDeptChg)
+```
+
+### 2. Show the standard deviation for Amount Paid by Medicare, Total Accommodation Charges, and Total Departmental Charges
+```{r}
+sd(AmtReim)
+sd(TotAccomChg)
+sd(TotDeptChg)
+```
+
+
+### 3. Use tapply() to compute the mean for Amount Paid by Medicare, Total Accommodation Charges, and Total Departmental Charges, by gender
+```{r}
+# sex = 1 for male
+# sex = 2 for female
+tapply(AmtReim, Sex, mean)
+tapply(TotAccomChg, Sex, mean)
+tapply(TotDeptChg, Sex, mean)
+```
+
+### 4. Create a boxplot for Amount Paid by Medicare, Total Accommodation Charges, and Total Departmental Charges by gender
+```{r}
+# medicare reimbursement
+boxplot(AmtReim~Sex, main=toupper("Medicare Reimbursement by Gender"))
+
+# total accomodation charges
+boxplot(TotAccomChg~Sex, main=toupper("Total Accomodation Charges by Gender"))
+
+# total departmental charges
+boxplot(TotDeptChg~Sex, main=toupper("Total Departmental Charges by Gender"))
+```
+
+### 5. Create a histogram for the following variables and describe what you see for each: 
+#### a. Accommodation charges
+#### b. Gender
+#### c. Age category
+
+```{r}
+# accomodation charges
+hist(TotAccomChg, main=toupper("Total Accomodation Charges"))
+# gender
+hist(Sex, main=toupper("Gender"))
+# category
+hist(Age, main=toupper("Ages"))
+```
+
+### 6. Graph the count of each gender for each admission source using a bar plot
+```{r}
+admsrcBYsex <- table(Sex, admsrc)
+
+#create barplot
+barplot(admsrcBYsex, main = "Admissions Source by Gender", xlab = "Admissions Source Code", legend = c("Male","Female"), beside=TRUE)
+```
+
+### 7. Using a bar plot, plot the mortality rate for MS-DRG 292 and MS-DRG 293
+```{r}
+newDRG292 <- subset(chf, drgcode==292)
+
+# discharge destination is expired
+newDRG292$dischdest[newDRG292$dischdest==20]
+
+# expired/all discharge destinations
+mortrate292 <-round(length(newDRG292$dischdest[newDRG292$dischdest==20])/length(newDRG292$dischdest),3)
+
+# subset of DRG 292 codes 
+newDRG293 <- subset(chf, drgcode==293)
+
+# discharge destination is expired
+newDRG293$dischdest[newDRG293$dischdest==20]
+
+# expired/all discharge destinations
+mortrate293 <-round(length(newDRG293$dischdest[newDRG293$dischdest==20])/length(newDRG293$dischdest),3)
+
+#create table 
+mortnames <- c("Mortality DRG 292", "Mortality DRG 293")
+mortrate <- c(mortrate292, mortrate293)
+morttable <- table(mortnames,mortrate)
+
+# bar graph of mortality rates of DRG = 292 and DRG = 293
+barplot(mortrate, main = "Mortality Rate among DRG codes 292 and 293", xlab = "DRG Code", legend = c("292", "293"), beside=TRUE)
+```
+
+### 8. You must determine if the average length of stay (LOS) for patients with MS-DRG
+```{r}
+# 1-sample ttest
+# LOS for drg 291
+LOS291 <- LOS[drgcode == 291]
+
+# ttest on mu =6
+t.test(LOS291, mu=6)
+```
+
+From the one-sample t-test, there is enough evidence to reject the null hypothesis that the mean length of stay for DRG 291 is six days. The results of the t-test suggest that the mean length of stay for DRG 291 is in fact greater than the average stay length.
